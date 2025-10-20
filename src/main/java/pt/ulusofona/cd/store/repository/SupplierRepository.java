@@ -17,6 +17,8 @@ public interface SupplierRepository extends JpaRepository<Supplier, UUID> {
     List<Supplier> findByCountry(String country);
     List<Supplier> findByCompanyNameContainingIgnoreCase(String companyName);
 
+
+
     @Query("SELECT s FROM Supplier s WHERE s.isActive = :active")
     List<Supplier> findByActiveStatus(@Param("active") boolean active);
 }

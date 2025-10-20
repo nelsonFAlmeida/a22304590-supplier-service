@@ -3,7 +3,9 @@ package pt.ulusofona.cd.store.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pt.ulusofona.cd.store.client.OrderClient;
 import pt.ulusofona.cd.store.client.ProductClient;
+import pt.ulusofona.cd.store.dto.MetricsDto;
 import pt.ulusofona.cd.store.dto.ProductDto;
 import pt.ulusofona.cd.store.dto.SupplierRequest;
 import pt.ulusofona.cd.store.exception.SupplierNotFoundException;
@@ -20,6 +22,7 @@ public class SupplierService {
 
     private final SupplierRepository supplierRepository;
     private final ProductClient productClient;
+    private final OrderClient orderClient;
 
     @Transactional
     public Supplier createSupplier(SupplierRequest request) {
@@ -72,12 +75,31 @@ public class SupplierService {
         return supplierRepository.save(supplier);
     }
 
+    //TODO o modo de Alterar estado de um supplier pode ser melhorado para ser mais seguro e mais eficiente usando pedidos maiores em vez de varios pedidos
     @Transactional
     public Supplier deactivateSupplier(UUID id) {
         Supplier supplier = getSupplierById(id);
+
+        boolean blocked;
+        try {
+            blocked = productClient.supplierHasBlockedProducts(id);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao comunicar com o serviço de produtos", e);
+        }
+
+        if (blocked) {
+            throw new IllegalStateException(
+                    "Não é possível desativar o fornecedor: existem produtos com encomendas pendentes"
+            );
+        }
+
+        productClient.discontinueProductsBySupplier(id);
+
         supplier.setActive(false);
         return supplierRepository.save(supplier);
     }
+
+
 
     @Transactional
     public void deleteSupplier(UUID id) {
@@ -92,4 +114,26 @@ public class SupplierService {
             throw new RuntimeException("Failed to fetch products for supplier: " + e.getMessage());
         }
     }
+
+    public List<MetricsDto> getMetricsByProduct(UUID id) {
+
+        // 1️⃣ Verificar se o supplier existe
+        supplierRepository.findById(id)
+                .orElseThrow(() -> new SupplierNotFoundException("Supplier not found with id: " + id));
+
+        // 2️⃣ Obter os produtos deste supplier
+        List<ProductDto> products = productClient.getProductsBySupplier(id.toString());
+
+        // 3️⃣ Extrair só os IDs dos produtos
+        List<UUID> productIds = products.stream()
+                .map(ProductDto::getId)
+                .toList();
+
+        // 4️⃣ Enviar a lista de IDs para o order-service e obter métricas
+        List<MetricsDto> metrics = orderClient.getOrdersCountByProducts(productIds);
+
+        // 5️⃣ Devolver o resultado ao controller
+        return metrics;
+    }
+
 }

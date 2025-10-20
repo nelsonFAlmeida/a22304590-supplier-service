@@ -92,4 +92,13 @@ public class SupplierController {
         supplierService.deleteSupplier(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}/metrics/products")
+    public ResponseEntity<List<pt.ulusofona.cd.store.dto.MetricsDto>> getMetricsByProduct(@PathVariable UUID id) {
+        List<pt.ulusofona.cd.store.dto.MetricsDto> metrics = supplierService.getMetricsByProduct(id);
+        return ResponseEntity.ok(metrics);
+    }
+
+
+
 }
