@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pt.ulusofona.cd.store.client.ProductClient;
 import pt.ulusofona.cd.store.dto.ProductDto;
 import pt.ulusofona.cd.store.dto.SupplierRequest;
 import pt.ulusofona.cd.store.dto.SupplierResponse;
@@ -98,6 +99,16 @@ public class SupplierController {
         List<pt.ulusofona.cd.store.dto.MetricsDto> metrics = supplierService.getMetricsByProduct(id);
         return ResponseEntity.ok(metrics);
     }
+
+    private final ProductClient productClient;
+
+    @GetMapping("/supplier/{supplierId}/blocked")
+    public ResponseEntity<Boolean> supplierHasBlockedProducts(@PathVariable UUID supplierId) {
+        Boolean hasBlocked = productClient.supplierHasBlockedProducts(supplierId);
+        return ResponseEntity.ok(hasBlocked);
+    }
+
+
 
 
 

@@ -16,7 +16,7 @@ public interface ProductClient {
     @GetMapping("/api/v1/products/supplier/{supplierId}")
     List<ProductDto> getProductsBySupplier(@PathVariable("supplierId") String supplierId);
 
-    @GetMapping("/api/v1/suppliers/{supplierId}/products/blocked")
+    @GetMapping("/api/v1/products/{supplierId}/products/blocked")
     Boolean supplierHasBlockedProducts(@PathVariable("supplierId") UUID supplierId);
 
     @PutMapping("/api/v1/suppliers/{supplierId}/products/discontinue")

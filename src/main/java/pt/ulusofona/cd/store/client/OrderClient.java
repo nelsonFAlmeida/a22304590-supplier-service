@@ -13,7 +13,7 @@ import java.util.UUID;
 @FeignClient(name = "order-service", url = "http://order-service:8083")
 public interface OrderClient {
 
-    @PostMapping("/orders/metrics/products")
+    @PostMapping("/api/v1/orders/metrics/products")
     List<MetricsDto> getOrdersCountByProducts(@RequestBody List<UUID> productIds);
 
 
