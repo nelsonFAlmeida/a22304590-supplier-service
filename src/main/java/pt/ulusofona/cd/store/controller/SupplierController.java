@@ -82,11 +82,14 @@ public class SupplierController {
         return ResponseEntity.ok(SupplierMapper.toResponse(activated));
     }
 
+
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<SupplierResponse> deactivateSupplier(@PathVariable UUID id) {
         Supplier deactivated = supplierService.deactivateSupplier(id);
         return ResponseEntity.ok(SupplierMapper.toResponse(deactivated));
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSupplier(@PathVariable UUID id) {

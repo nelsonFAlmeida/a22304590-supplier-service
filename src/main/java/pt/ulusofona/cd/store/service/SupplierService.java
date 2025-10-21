@@ -8,6 +8,7 @@ import pt.ulusofona.cd.store.client.ProductClient;
 import pt.ulusofona.cd.store.dto.MetricsDto;
 import pt.ulusofona.cd.store.dto.ProductDto;
 import pt.ulusofona.cd.store.dto.SupplierRequest;
+import pt.ulusofona.cd.store.events.SupplierEventProducer;
 import pt.ulusofona.cd.store.exception.SupplierNotFoundException;
 import pt.ulusofona.cd.store.mapper.SupplierMapper;
 import pt.ulusofona.cd.store.model.Supplier;
@@ -23,6 +24,7 @@ public class SupplierService {
     private final SupplierRepository supplierRepository;
     private final ProductClient productClient;
     private final OrderClient orderClient;
+    private final SupplierEventProducer supplierEventProducer;
 
     @Transactional
     public Supplier createSupplier(SupplierRequest request) {
@@ -75,7 +77,8 @@ public class SupplierService {
         return supplierRepository.save(supplier);
     }
 
-    //TODO o modo de Alterar estado de um supplier pode ser melhorado para ser mais seguro e mais eficiente usando pedidos maiores em vez de varios pedidos
+    /*
+    //o modo de Alterar estado de um supplier pode ser melhorado para ser mais seguro e mais eficiente usando pedidos maiores em vez de varios pedidos
     @Transactional
     public Supplier deactivateSupplier(UUID id) {
         Supplier supplier = getSupplierById(id);
@@ -99,7 +102,7 @@ public class SupplierService {
         return supplierRepository.save(supplier);
     }
 
-
+    */
 
     @Transactional
     public void deleteSupplier(UUID id) {
@@ -135,5 +138,18 @@ public class SupplierService {
         // 5️⃣ Devolver o resultado ao controller
         return metrics;
     }
+
+    @Transactional
+    public Supplier deactivateSupplier(UUID id) {
+        Supplier supplier = getSupplierById(id);
+        supplier.setActive(false);
+
+        Supplier supplierUpdate = supplierRepository.save(supplier);
+
+        supplierEventProducer.sendSupplierDeactivatedEvent(supplier.getId());
+
+        return supplierUpdate;
+    }
+
 
 }

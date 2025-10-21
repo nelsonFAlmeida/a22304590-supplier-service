@@ -4,6 +4,11 @@ server:
 spring:
   application:
     name: ${APPLICATION_NAME}
+  kafka:
+    producer:
+      bootstrap-servers: kafka:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
   datasource:
     url: jdbc:postgresql://${POSTGRES_DB}:5432/${POSTGRES_DB}
@@ -46,3 +51,7 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+supplier:
+  events:
+    supplier-deactivated-events: supplier-deactivated-events
