@@ -14,6 +14,7 @@ import pt.ulusofona.cd.store.mapper.SupplierMapper;
 import pt.ulusofona.cd.store.model.Supplier;
 import pt.ulusofona.cd.store.repository.SupplierRepository;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -145,8 +146,7 @@ public class SupplierService {
         supplier.setActive(false);
 
         Supplier supplierUpdate = supplierRepository.save(supplier);
-
-        supplierEventProducer.sendSupplierDeactivatedEvent(supplier.getId());
+        supplierEventProducer.sendSupplierDeactivatedEvent(supplier);
 
         return supplierUpdate;
     }

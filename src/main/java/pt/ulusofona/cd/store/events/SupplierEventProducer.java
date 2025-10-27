@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import pt.ulusofona.cd.store.dto.SupplierDeactivatedEvent;
+import pt.ulusofona.cd.store.model.Supplier;
+
 
 import java.util.UUID;
 
@@ -19,10 +21,15 @@ public class SupplierEventProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendSupplierDeactivatedEvent(UUID supplierId) {
-        SupplierDeactivatedEvent event = new SupplierDeactivatedEvent(supplierId.toString());
+    public void sendSupplierDeactivatedEvent(Supplier supplier) {
 
-        kafkaTemplate.send(supplierDeactivatedEventsTopic, supplierId.toString(), event)
+        SupplierDeactivatedEvent event = new SupplierDeactivatedEvent(supplier.getId().toString(),
+                supplier.getCompanyName(),
+                supplier.getEmail(),
+                supplier.isActive(),
+                java.time.LocalDateTime.now());
+
+        kafkaTemplate.send(supplierDeactivatedEventsTopic, supplier.getId().toString(), event)
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
                         System.out.println("Sent message=[" + event + "]");
