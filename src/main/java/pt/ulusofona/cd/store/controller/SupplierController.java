@@ -5,9 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pt.ulusofona.cd.store.client.ProductClient;
-import pt.ulusofona.cd.store.dto.ProductDto;
-import pt.ulusofona.cd.store.dto.SupplierRequest;
-import pt.ulusofona.cd.store.dto.SupplierResponse;
+import pt.ulusofona.cd.store.dto.*;
 import pt.ulusofona.cd.store.mapper.SupplierMapper;
 import pt.ulusofona.cd.store.model.Supplier;
 
@@ -23,6 +21,16 @@ import java.util.UUID;
 public class SupplierController {
 
     private final SupplierService supplierService;
+
+    @PostMapping("/{supplierId}/products/{productId}/production")
+    public void reportProduction(
+            @PathVariable UUID supplierId,
+            @PathVariable UUID productId,
+            @Valid @RequestBody ReportProduction report
+    ) {
+        supplierService.reportProduction(supplierId, productId, report);
+    }
+
 
     @PostMapping
     public ResponseEntity<SupplierResponse> createSupplier(@Valid @RequestBody SupplierRequest supplier) {

@@ -5,9 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pt.ulusofona.cd.store.client.OrderClient;
 import pt.ulusofona.cd.store.client.ProductClient;
-import pt.ulusofona.cd.store.dto.MetricsDto;
-import pt.ulusofona.cd.store.dto.ProductDto;
-import pt.ulusofona.cd.store.dto.SupplierRequest;
+import pt.ulusofona.cd.store.dto.*;
 import pt.ulusofona.cd.store.events.SupplierEventProducer;
 import pt.ulusofona.cd.store.exception.SupplierNotFoundException;
 import pt.ulusofona.cd.store.mapper.SupplierMapper;
@@ -149,6 +147,20 @@ public class SupplierService {
         supplierEventProducer.sendSupplierDeactivatedEvent(supplier);
 
         return supplierUpdate;
+    }
+
+    public void reportProduction(UUID supplierId, UUID productId, ReportProduction production) {
+        Supplier supplier = getSupplierById(supplierId);
+
+        ReportProductionEvent reportProductionEvent = new ReportProductionEvent(
+                supplier.getId().toString(),
+                supplier.getCompanyName(),
+                productId.toString(),
+                production.getQuantity(),
+                java.time.LocalDateTime.now()
+        );
+
+        supplierEventProducer.sendSupplierReportProductionEvent(reportProductionEvent);
     }
 
 
