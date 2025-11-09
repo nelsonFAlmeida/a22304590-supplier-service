@@ -3,6 +3,7 @@ package pt.ulusofona.cd.store.events;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import pt.ulusofona.cd.store.dto.MessageEnvelope;
 import pt.ulusofona.cd.store.dto.ReportProductionEvent;
 import pt.ulusofona.cd.store.dto.SupplierDeactivatedEvent;
 import pt.ulusofona.cd.store.model.Supplier;
@@ -22,35 +23,47 @@ public class SupplierEventProducer {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public void sendSupplierDeactivatedEvent(Supplier supplier) {
+    public void sendSupplierDeactivatedEvent(SupplierDeactivatedEvent payload) {
 
-        SupplierDeactivatedEvent event = new SupplierDeactivatedEvent(supplier.getId().toString(),
-                supplier.getCompanyName(),
-                supplier.getEmail(),
-                supplier.isActive(),
-                java.time.LocalDateTime.now());
+        MessageEnvelope<SupplierDeactivatedEvent> envelope = new MessageEnvelope<>(
+                UUID.randomUUID(),
+                "SupplierDeactivatedEvent",
+                java.time.Instant.now(),
+                payload.getSupplierId(),
+                "supplier-service:update",
+                payload
+        );
 
-        kafkaTemplate.send(supplierDeactivatedEventsTopic, supplier.getId().toString(), event)
+        kafkaTemplate.send(supplierDeactivatedEventsTopic, payload.getSupplierId(), envelope)
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
-                        System.out.println("Sent message=[" + event + "]");
+                        System.out.println("Published SupplierDeactivated event for supplier: " + payload.getSupplierId());
                     } else {
-                        System.err.println("Unable to send message=[" + event + "] due to : " + ex.getMessage());
+                        System.err.println("Failed to publish SupplierDeactivated event: " + ex.getMessage());
                     }
                 });
     }
 
-
     @Value("${supplier.events.report-production-events}")
     private String supplierReportProductionEventsTopic;
 
-    public void sendSupplierReportProductionEvent(ReportProductionEvent reportProductionEvent) {
-        kafkaTemplate.send(supplierReportProductionEventsTopic, UUID.randomUUID().toString(), reportProductionEvent)
+    public void sendSupplierReportProductionEvent(ReportProductionEvent payload) {
+
+        MessageEnvelope<ReportProductionEvent> envelope = new MessageEnvelope<>(
+                UUID.randomUUID(),
+                "ReportProductionEvent",
+                java.time.Instant.now(),
+                payload.getOrderId(),
+                "supplier-service:update",
+                payload
+        );
+
+        kafkaTemplate.send(supplierReportProductionEventsTopic, payload.getSupplierId(), envelope)
                 .whenComplete((result, ex) -> {
                     if (ex == null) {
-                        System.out.println("Sent message=[" + reportProductionEvent + "]");
+                        System.out.println("Published ReportProduction event for supplier: " + payload.getSupplierId());
                     } else {
-                        System.err.println("Unable to send message=[" + reportProductionEvent + "] due to : " + ex.getMessage());
+                        System.err.println("Failed to publish ReportProduction event: " + ex.getMessage());
                     }
                 });
     }

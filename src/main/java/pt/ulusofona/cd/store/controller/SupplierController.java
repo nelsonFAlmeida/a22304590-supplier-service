@@ -25,7 +25,7 @@ public class SupplierController {
     @PostMapping("/{supplierId}/products/{productId}/production")
     public void reportProduction(
             @PathVariable UUID supplierId,
-            @PathVariable UUID productId,
+            @PathVariable String productId,
             @Valid @RequestBody ReportProduction report
     ) {
         supplierService.reportProduction(supplierId, productId, report);

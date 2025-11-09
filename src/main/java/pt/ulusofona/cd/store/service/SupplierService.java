@@ -144,12 +144,18 @@ public class SupplierService {
         supplier.setActive(false);
 
         Supplier supplierUpdate = supplierRepository.save(supplier);
-        supplierEventProducer.sendSupplierDeactivatedEvent(supplier);
+        SupplierDeactivatedEvent event = new SupplierDeactivatedEvent(supplier.getId().toString(),
+                supplier.getCompanyName(),
+                supplier.getEmail(),
+                supplier.isActive(),
+                java.time.LocalDateTime.now());
+
+        supplierEventProducer.sendSupplierDeactivatedEvent(event);
 
         return supplierUpdate;
     }
 
-    public void reportProduction(UUID supplierId, UUID productId, ReportProduction production) {
+    public void reportProduction(UUID supplierId, String productId, ReportProduction production) {
         Supplier supplier = getSupplierById(supplierId);
 
         ReportProductionEvent reportProductionEvent = new ReportProductionEvent(
